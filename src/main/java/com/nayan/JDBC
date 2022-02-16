@@ -1,0 +1,2 @@
+Postman = RestAPI = Client
+DAO is responsible for communicating with JDBCTemplate

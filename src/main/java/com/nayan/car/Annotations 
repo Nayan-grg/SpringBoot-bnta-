@@ -1,0 +1,6 @@
+@Component + @Autowired (this is optional now)
+Once you do @Component to a class, you create a java bean aka an instance of the class stored in the heap
+Bean can be autowired through code
+
+@Repository is used for anything that talks to the database
+

@@ -14,7 +14,6 @@ public class FakeCarDataAccessService implements CarDAO{
         this.cars=new ArrayList<>(); //This creates an instance of cars
     }
 
-
     @Override
     public int insertCar(Car car) {
         cars.add(car);
@@ -53,7 +52,6 @@ public class FakeCarDataAccessService implements CarDAO{
         }
         return null;
     }
-
     @Override
     public List<Car> selectAllCars() {
         return cars;
