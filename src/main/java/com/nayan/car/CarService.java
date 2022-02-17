@@ -14,7 +14,7 @@ public class CarService {
 
     private CarDAO carDAO;
 
-    public CarService(@Qualifier("fake") CarDAO carDAO) {
+    public CarService(@Qualifier("postgres") CarDAO carDAO) {
         this.carDAO = carDAO;
     }
 
@@ -22,32 +22,49 @@ public class CarService {
         //Business Logic: Check if reg number is valid and not take
         if(car.getPrice()<=0){
             throw new IllegalStateException("Car price cannot be 0 or less");
-        }
-        int result = carDAO.insertCar(car);
+        }int result = carDAO.insertCar(car);
         if(result!=1){
             throw new IllegalStateException("Could not save car");
         }
     }
 
     public List<Car> getCars(){
+//        if(carDAO.selectAllCars()==null){
+//            throw new IllegalStateException("no cars available");
+//        }
         return carDAO.selectAllCars();
     }
 
     public Car getCarsById(int id){
+        if(carDAO.selectCar(id)==null){
+            throw new IllegalStateException("car not found");
+        }
         return carDAO.selectCar(id);
     }
     public void deleteCarById(int id){
-        for (Car selectAllCar : carDAO.selectAllCars()) {
-            if(selectAllCar.getId()==id){
-                carDAO.deleteCar(selectAllCar);
+        //check if you can find the car
+        if(carDAO.selectCar(id)!=null) {
+            for (Car selectAllCar : carDAO.selectAllCars()) {
+                if (selectAllCar.getId() == id) {
+                    carDAO.deleteCar(selectAllCar);
+                }
             }
+        }else{
+            throw new IllegalStateException("car not found");
         }
     }
     public void updateCar(Integer carId, Car update){
-        for (Car selectAllCar : carDAO.selectAllCars()) {
-            if(selectAllCar.getId()==carId){
-                carDAO.updateCar(carId,update);
+
+        //only update car if it exists otherwise throw new exception
+        if(carDAO.selectCar(carId)!=null){
+            for (Car selectAllCar : carDAO.selectAllCars()) {
+                if(selectAllCar.getId()==carId){
+                    carDAO.updateCar(carId,update);
+                }
             }
+        }else{
+            throw new IllegalStateException("car not found");
         }
+
     }
 }

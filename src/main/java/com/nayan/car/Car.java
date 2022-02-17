@@ -1,11 +1,14 @@
 package com.nayan.car;
 
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 public class Car {
+    public Car() {
+    }
 
     private Integer id;
-    private Brand brand;
+    @NotNull private Brand brand;
     private String regNumber;
     private Double price;
 
