@@ -1,16 +1,17 @@
 package com.nayan.car;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Repository("postgres")
 public class CarDataAccessService implements CarDAO{
 
-    //Because we are using spring, an instance of JDBCTemplate is injected into the heap, so it can be autowired without having to annotate it as a component.
+    //Because we are using spring, an instance of JDBCTemplate is injected into the heap,
+    // so it can be autowired without having to annotate it as a component.
     private JdbcTemplate jdbcTemplate;
 
     public CarDataAccessService(JdbcTemplate jdbcTemplate) {
@@ -20,34 +21,48 @@ public class CarDataAccessService implements CarDAO{
     @Override
     public int insertCar(Car car) {
         String insertSql = """
-    INSERT INTO car(brand, regNumber,price) VALUES(?, ?,?)
-    """;
-        return jdbcTemplate.update(insertSql,String.valueOf(car.getBrand()),car.getRegNumber(),car.getPrice());
+                    INSERT INTO car(brand, regNumber,price) 
+                    VALUES(?, ?,?)
+                    """;
+        int rowsAffected= jdbcTemplate.update(
+                insertSql,
+                String.valueOf(car.getBrand()),
+                car.getRegNumber(),
+                car.getPrice());
+        return rowsAffected;
     }
 
     @Override
-    public int deleteCar(Car car) {
+    public int deleteCar(Integer id) {
         String sql="DELETE FROM car WHERE id=?";
-        return jdbcTemplate.update(sql,car.getId());
-
+        int rowsAffected=jdbcTemplate.update(sql,id);
+        return rowsAffected;
     }
+
 
 
     @Override
     public Car selectCar(Integer id) {
-        String sql= "SELECT * FROM car WHERE id =? ";
-        return jdbcTemplate.queryForObject(sql,new Row(),id);
+        Car car;
+        try {
+            String sql = "SELECT * FROM car WHERE id =? ";
+            car = jdbcTemplate.queryForObject(sql, new RowMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+        return car;
     }
-
 
 
     @Override
     public List<Car> selectAllCars() {
+        //Don't use * in SQL
         String insertSql = """
-                            SELECT * FROM car
+                            SELECT id,regNumber,brand,price 
+                            FROM car
                             """;
 //        List<Map<String, Object>> rows=jdbcTemplate.queryForList(insertSql);
-        List<Car> cars= jdbcTemplate.query(insertSql,new Row());
+        List<Car> cars= jdbcTemplate.query(insertSql,new RowMapper());
         return cars;
 
     }
