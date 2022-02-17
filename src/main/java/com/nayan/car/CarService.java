@@ -1,10 +1,10 @@
 package com.nayan.car;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nayan.car.exception.CarNotFoundException;
+import com.nayan.car.exception.InvalidRequestException;
+import com.nayan.car.exception.RegNumberInvalid;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -18,40 +18,59 @@ public class CarService {
         this.carDAO = carDAO;
     }
 
-    public void registerNewCar(Car car ){
-        //Business Logic: Check if reg number is valid and not take
-        if(car.getPrice()<=0){
-            throw new IllegalStateException("Car price cannot be 0 or less");
-        }int result = carDAO.insertCar(car);
-        if(result!=1){
-            throw new IllegalStateException("Could not save car");
+    public boolean validateRegNumber(String regNumber){
+        String space=" ";
+        boolean isValid;
+        if(space.equals(regNumber.substring(3,4))&&(regNumber.length()==7)){
+            return true;
+        }else{
+            return false;
         }
+    }
+    public boolean checkIfRegNumberTaken(String regNumber){
+        for (Car car : carDAO.selectAllCars()) {
+            if(car.getRegNumber().equals(regNumber)){
+                return false;
+            }
+        }return true;
+    }
+
+    public void registerNewCar(Car car ){
+        //check if the regNumber is in the right format
+       if( !validateRegNumber(car.getRegNumber())){
+           throw new RegNumberInvalid("RegNumber not valid. Check the format again");
+       }
+       //check if the reg number is already taken
+        if(!checkIfRegNumberTaken(car.getRegNumber())){
+            throw new RegNumberInvalid("Reg number already taken");
+        }
+        //check if the price is less than 0
+        if(car.getPrice()<=0){
+            throw new InvalidRequestException("Car price cannot be 0 or less");
+        }
+        int result = carDAO.insertCar(car);
+
     }
 
     public List<Car> getCars(){
-//        if(carDAO.selectAllCars()==null){
-//            throw new IllegalStateException("no cars available");
-//        }
+        if(carDAO.selectAllCars()==null){
+            throw new CarNotFoundException("no cars available");
+        }
         return carDAO.selectAllCars();
     }
 
     public Car getCarsById(int id){
         if(carDAO.selectCar(id)==null){
-            throw new IllegalStateException("car not found");
-        }
-        return carDAO.selectCar(id);
+            throw new CarNotFoundException("car not found");
+        }else {
+        return carDAO.selectCar(id);}
     }
-    public void deleteCarById(int id){
-        //check if you can find the car
-        if(carDAO.selectCar(id)!=null) {
-            for (Car selectAllCar : carDAO.selectAllCars()) {
-                if (selectAllCar.getId() == id) {
-                    carDAO.deleteCar(selectAllCar);
-                }
-            }
-        }else{
-            throw new IllegalStateException("car not found");
+    public void deleteCarById(Integer id){
+        if(carDAO.selectCar(id)==null) {
+            throw new CarNotFoundException("car with " + id + " not found");
         }
+        carDAO.deleteCar(id);
+
     }
     public void updateCar(Integer carId, Car update){
 
@@ -63,7 +82,7 @@ public class CarService {
                 }
             }
         }else{
-            throw new IllegalStateException("car not found");
+            throw new CarNotFoundException("car not found");
         }
 
     }
