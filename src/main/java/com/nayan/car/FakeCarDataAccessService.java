@@ -21,16 +21,17 @@ public class FakeCarDataAccessService implements CarDAO{
     }
 
     @Override
-    public int deleteCar(Car car) {
+    public int deleteCar(Integer id) {
         for (Car car1 : cars) {
-            if(car.getId()==car1.getId()){
-                cars.remove(car);
+            if(id==car1.getId()){
+                cars.remove(id);
                 return 1;
             }
 
         }
         return 0;
     }
+
 
     @Override
     public int updateCar(Integer id, Car updatedCar) {
