@@ -1,4 +1,4 @@
-package com.nayan.car;
+package com.nayan.car.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
